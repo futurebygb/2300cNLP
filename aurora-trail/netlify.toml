@@ -1,4 +1,4 @@
-# Static site: no build step, publish the repo root (index.html).
+# Static site: no build step. Netlify base directory = aurora-trail; publish "." is relative to it.
 [build]
   publish = "."
   command = ""
