@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Trail</title>
+  <meta name="description" content="Aurora Trail writes a story starring your child, at their reading level, in English or Spanish.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&family=Lexend:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <!-- Top bar (frosted glass) -->
+  <header class="topbar glass">
+    <a class="brand" href="./" aria-label="Aurora Trail, start over">
+      <img src="logo.svg" alt="" width="36" height="36">
+      <span>Aurora Trail</span>
+    </a>
+    <div class="topbar-controls">
+      <div class="segmented" role="group" aria-label="Colour mode">
+        <button type="button" data-theme-choice="day" aria-pressed="true">☀ Day</button>
+        <button type="button" data-theme-choice="bedtime" aria-pressed="false">☾ Bedtime</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- =================================================================
+         STEP 1 INPUT: the hero builder form.
+         ================================================================= -->
+    <section id="view-setup" class="view">
+      <form id="setup-form" class="card glass setup" novalidate>
+        <p class="eyebrow">Your first chapter is free · No account needed</p>
+        <h1>Who's the hero of this story?</h1>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="label">Hero's first name</span>
+            <input name="name" type="text" autocomplete="off" maxlength="30" required placeholder="e.g. Maya">
+          </label>
+          <label class="field">
+            <span class="label">Companion <span class="optional">(optional)</span></span>
+            <input name="companion" type="text" autocomplete="off" maxlength="30" placeholder="e.g. Pickles the fox">
+          </label>
+        </div>
+
+        <fieldset class="field">
+          <legend class="label">Age</legend>
+          <div class="chips" id="age-chips"></div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend class="label">Loves <span class="optional">· pick up to 3</span></legend>
+          <div class="chips" id="interest-chips"></div>
+          <div class="add-interest">
+            <input id="custom-interest" type="text" maxlength="30" placeholder="Add your own (e.g. trains)" aria-label="Add your own interest">
+            <button type="button" class="btn btn-quiet" id="add-interest">Add</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend class="label">Reading level</legend>
+          <div class="chips levels" id="level-chips"></div>
+          <p class="hint">Pick the level they read comfortably. You can make each chapter easier or harder later.</p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend class="label">Story language</legend>
+          <div class="chips" id="language-chips"></div>
+        </fieldset>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+
+        <button class="btn btn-primary btn-big" type="submit">Write my free chapter</button>
+        <p class="hint center">Stories are written by AI, checked for reading level and safety before they appear.</p>
+      </form>
+    </section>
+
+    <!-- Progress while the pipeline runs -->
+    <section id="view-working" class="view" hidden>
+      <div class="card glass working" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2 id="working-title">Writing your story…</h2>
+        <ol class="steps" id="working-steps"></ol>
+      </div>
+    </section>
+
+    <!-- The reader -->
+    <section id="view-reader" class="view" hidden>
+      <div class="reader-layout">
+        <article class="story-col">
+          <div class="reader-toolbar glass">
+            <span class="badge" id="free-badge">Free chapter</span>
+            <div class="toolbar-right">
+              <button type="button" class="btn btn-quiet" id="font-down" aria-label="Smaller text">A−</button>
+              <button type="button" class="btn btn-quiet" id="font-up" aria-label="Bigger text">A+</button>
+              <button type="button" class="btn btn-quiet" id="easy-font" aria-pressed="false">Aa Easy-read</button>
+            </div>
+          </div>
+
+          <!-- Story text sits on a SOLID, high-contrast panel (no glass). -->
+          <div class="story-panel" id="story-panel">
+            <p class="chapter-kicker" id="chapter-kicker"></p>
+            <h1 class="chapter-title" id="chapter-title"></h1>
+            <div class="story-text" id="story-text"></div>
+          </div>
+
+          <!-- STEP 4 VOCABULARY: definition card for the tapped word -->
+          <div class="word-card" id="word-card" hidden aria-live="polite">
+            <p class="word-card-kicker" id="word-card-kicker">New word</p>
+            <p class="word-card-word" id="word-card-word"></p>
+            <p class="word-card-pos" id="word-card-pos"></p>
+            <p class="word-card-def" id="word-card-def"></p>
+            <button type="button" class="btn btn-quiet" id="word-card-close">Got it</button>
+          </div>
+
+          <!-- STEP 5 ADAPT -->
+          <div class="adapt-row">
+            <button type="button" class="btn btn-adapt" id="btn-easier">Make it easier</button>
+            <span class="adapt-hint" id="adapt-hint">Tap a gold word to learn it</span>
+            <button type="button" class="btn btn-adapt btn-challenge" id="btn-harder">Challenge me</button>
+          </div>
+          <p class="form-error" id="reader-error" role="alert" hidden></p>
+
+          <div class="card glass next-card">
+            <p><strong id="next-title">That's the end of your free chapter.</strong></p>
+            <p class="hint" id="next-hint">Want a different adventure? Start a new story with new interests.</p>
+            <button type="button" class="btn btn-primary" id="btn-new">Start a new story</button>
+          </div>
+        </article>
+
+        <aside class="side-col">
+          <div class="card glass stats" id="chapter-stats"></div>
+          <details class="card glass pipeline" id="pipeline">
+            <summary>How this chapter was made <span class="hint">· NLP pipeline</span></summary>
+            <div id="pipeline-body"></div>
+          </details>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Aurora Trail · an NLP course project · Stories are AI-generated and checked before display.</p>
+  </footer>
+
+  <noscript><p class="noscript">Aurora Trail needs JavaScript to write stories.</p></noscript>
+</body>
+</html>

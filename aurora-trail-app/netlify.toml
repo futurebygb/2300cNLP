@@ -1,0 +1,25 @@
+# Aurora Trail app. In Netlify, set this site's Base directory to:
+#   aurora-trail-app
+# Paths below are relative to that folder.
+
+[build]
+  publish = "public"              # the static app (HTML, CSS, JS)
+  functions = "netlify/functions" # story.mjs: the only code that calls Claude
+  command = ""                    # no build step; Netlify installs package.json dependencies itself
+
+[functions]
+  node_bundler = "esbuild"        # bundles shared/nlp.js and the Anthropic SDK into the function
+
+[dev]
+  port = 8888
+  publish = "public"
+
+# Security headers. The browser may only talk to this site (connect-src 'self');
+# all Claude calls happen inside the function, where ANTHROPIC_API_KEY lives.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
